@@ -15,8 +15,11 @@ export interface IStudent extends Document {
 
 const StudentSchema: Schema = new Schema(
   {
+    // All fields are stored as encrypted strings — no unique constraint
+    // on email because AES ciphertext differs each time (random salt).
+    // Duplicate-email check is done manually in the controller.
     fullName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true },
     phoneNumber: { type: String, required: true },
     dateOfBirth: { type: String, required: true },
     gender: { type: String, required: true },

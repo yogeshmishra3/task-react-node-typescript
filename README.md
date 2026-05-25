@@ -34,10 +34,35 @@ This application implements **2-level AES encryption** to ensure data security a
 1. **Backend** fetches the doubly-encrypted data from MongoDB and removes Level 2 encryption.
 2. **Frontend** receives Level 1 encrypted data and decrypts it for display.
 
+### Login Flow
+
+- Login sends **plaintext** email & password (no Level 1 encryption needed for login).
+- Backend **fully decrypts** stored emails (Level 2 → Level 1 → plaintext) to find the matching student.
+- Password is validated with `bcrypt.compare()` against the stored hash.
+- This is necessary because AES uses a random salt — the same plaintext produces different ciphertext each time, so encrypted values can't be compared directly.
+
 ### Password Handling
 
 - Passwords are **hashed** using bcrypt (not encrypted) — they cannot be reversed.
 - Login validation uses `bcrypt.compare()` against the stored hash.
+
+### Validations
+
+**Frontend (React):**
+- Full Name: required, 2–100 chars, letters/spaces only
+- Email: required, valid email format
+- Phone: required, 7–15 digits (optional `+` prefix)
+- Date of Birth: required, must be in the past
+- Gender: required, must be Male/Female/Other
+- Address: required, 5–300 chars
+- Course: required, min 2 chars
+- Password: min 6 chars, at least 1 uppercase letter, at least 1 number
+
+**Backend (Express):**
+- All required fields validated for presence (non-empty strings)
+- Duplicate email detection (full decrypt + case-insensitive compare)
+- MongoDB ObjectId validation for `:id` params
+- Proper HTTP error codes (400, 401, 404, 500)
 
 ## Setup Instructions
 

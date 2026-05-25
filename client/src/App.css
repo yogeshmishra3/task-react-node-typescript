@@ -185,6 +185,29 @@ button[type="submit"]:disabled {
   font-size: 0.9rem;
 }
 
+.success-message {
+  background: #eafaf1;
+  color: #27ae60;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #a9dfbf;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.field-error {
+  color: #e74c3c;
+  font-size: 0.78rem;
+  margin-top: 3px;
+  display: block;
+}
+
+.input-error {
+  border-color: #e74c3c !important;
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.15) !important;
+}
+
 .info-box {
   text-align: center;
   margin-top: 20px;

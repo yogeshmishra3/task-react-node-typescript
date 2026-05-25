@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { encryptLevel1 } from '../utils/crypto';
 
 interface LoginFormProps {
   onLoginSuccess: () => void;
@@ -21,11 +20,19 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
     e.preventDefault();
     setError('');
 
-    if (!validateEmail(email)) {
-      setError('Please enter a valid email address');
+    // ── Frontend validations ──
+    if (!email.trim()) {
+      setError('Email is required');
       return;
     }
-
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address (e.g. user@example.com)');
+      return;
+    }
+    if (!password) {
+      setError('Password is required');
+      return;
+    }
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
@@ -33,14 +40,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
 
     setLoading(true);
     try {
-      const encryptedEmail = encryptLevel1(email);
+      // Login sends plaintext email + password.
+      // (AES ciphertext differs on every call, so we can't encrypt-then-compare.
+      //  Backend fully decrypts the stored email for comparison.)
       await axios.post('http://localhost:5000/api/login', {
-        email: encryptedEmail,
+        email: email.trim(),
         password,
       });
       onLoginSuccess();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed');
+      setError(err.response?.data?.error || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
