@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { encryptStudentData } from '../utils/crypto';
 
 interface StudentFormProps {
@@ -158,13 +158,13 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSuccess, editingStudent, on
       const dataToSend = encryptStudentData(formData);
 
       if (editingStudent) {
-        await axios.put(
-          `http://localhost:5000/api/student/${editingStudent._id}`,
+        await api.put(
+          `/api/student/${editingStudent._id}`,
           dataToSend
         );
         setSuccessMsg('Student updated successfully!');
       } else {
-        await axios.post('http://localhost:5000/api/register', dataToSend);
+        await api.post('/api/register', dataToSend);
         setSuccessMsg('Student registered successfully!');
       }
 

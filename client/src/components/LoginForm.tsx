@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
 interface LoginFormProps {
   onLoginSuccess: () => void;
@@ -43,10 +43,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
       // Login sends plaintext email + password.
       // (AES ciphertext differs on every call, so we can't encrypt-then-compare.
       //  Backend fully decrypts the stored email for comparison.)
-      await axios.post('http://localhost:5000/api/login', {
+      const response = await api.post('/api/login', {
         email: email.trim(),
         password,
       });
+      // Store token in localStorage for authenticated requests
+      localStorage.setItem('authToken', response.data.token);
       onLoginSuccess();
     } catch (err: any) {
       setError(err.response?.data?.error || 'Login failed. Please try again.');

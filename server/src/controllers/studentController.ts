@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import Student, { IStudent } from '../models/Student';
 import { encryptLevel2, decryptLevel2, decryptLevel1, decryptFull } from '../utils/crypto';
+import { generateToken, AuthRequest } from '../middleware/auth';
 import bcrypt from 'bcryptjs';
 
 // ── Validation helpers ───────────────────────────────────────
@@ -126,7 +127,9 @@ export const createStudent = async (req: Request, res: Response): Promise<void> 
     // 4. Hash password (arrives as plaintext from frontend)
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 5. Apply Level 2 encryption and store
+    // 5. Apply Level 2 on top of the received Level 1 ciphertext.
+    //    Data at rest = Level2(Level1(plaintext)) so login (decryptFull) and the
+    //    student list (frontend decryptLevel1) both decrypt symmetrically.
     const encryptedData = encryptStudentData({
       fullName,
       email,
@@ -212,7 +215,8 @@ export const updateStudent = async (req: Request, res: Response): Promise<void> 
       }
     }
 
-    // 4. Build update object — only set provided fields
+    // 4. Build update object — apply Level 2 on top of the received Level 1 ciphertext
+    //    (keeps data at rest = Level2(Level1(plaintext)), matching registration)
     const encryptedData: any = {};
     if (isNonEmptyString(fullName)) encryptedData.fullName = encryptLevel2(fullName);
     if (isNonEmptyString(email)) encryptedData.email = encryptLevel2(email);
@@ -241,7 +245,7 @@ export const updateStudent = async (req: Request, res: Response): Promise<void> 
 
 // ── DELETE /api/student/:id ──────────────────────────────────
 
-export const deleteStudent = async (req: Request, res: Response): Promise<void> => {
+export const deleteStudent = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -257,7 +261,10 @@ export const deleteStudent = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    res.status(200).json({ message: 'Student deleted successfully' });
+    res.status(200).json({
+      message: 'Student deleted successfully',
+      sessionInvalidated: true,
+    });
   } catch (error) {
     console.error('Delete error:', error);
     res.status(500).json({ error: 'Server error while deleting student' });
@@ -307,9 +314,12 @@ export const loginStudent = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
+    const token = generateToken(foundStudent._id.toString());
+
     res.status(200).json({
       message: 'Login successful',
       studentId: foundStudent._id,
+      token,
     });
   } catch (error) {
     console.error('Login error:', error);

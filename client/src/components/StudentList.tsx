@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { decryptStudentData } from '../utils/crypto';
 
 interface Student {
@@ -28,7 +28,7 @@ const StudentList: React.FC<StudentListProps> = ({ refreshTrigger, onEdit }) => 
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get('http://localhost:5000/api/students');
+      const response = await api.get('/api/students');
       // Backend sends Level 1 encrypted data → Frontend decrypts Level 1
       const decryptedStudents = response.data.map((student: any) => decryptStudentData(student));
       setStudents(decryptedStudents as Student[]);
@@ -47,7 +47,7 @@ const StudentList: React.FC<StudentListProps> = ({ refreshTrigger, onEdit }) => 
     if (!window.confirm('Are you sure you want to delete this student?')) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/student/${id}`);
+      await api.delete(`/api/student/${id}`);
       fetchStudents();
     } catch (err) {
       setError('Failed to delete student');

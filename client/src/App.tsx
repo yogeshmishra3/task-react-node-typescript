@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LoginForm from './components/LoginForm';
 import StudentForm from './components/StudentForm';
 import StudentList from './components/StudentList';
+import { setLogoutCallback } from './utils/api';
 import './App.css';
 
 const App: React.FC = () => {
@@ -9,6 +10,20 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'register' | 'list'>('register');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [editingStudent, setEditingStudent] = useState<any>(null);
+
+  useEffect(() => {
+    // Check for token on mount to restore login state
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      setIsLoggedIn(true);
+    }
+
+    // Set up logout callback for 401 errors
+    setLogoutCallback(() => {
+      setIsLoggedIn(false);
+      setEditingStudent(null);
+    });
+  }, []);
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
@@ -30,6 +45,7 @@ const App: React.FC = () => {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('authToken');
     setIsLoggedIn(false);
     setEditingStudent(null);
   };
