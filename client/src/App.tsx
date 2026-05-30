@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import LoginForm from './components/LoginForm';
 import StudentForm from './components/StudentForm';
 import StudentList from './components/StudentList';
+import UnauthorizedModal from './components/UnauthorizedModal';
 import { setLogoutCallback } from './utils/api';
 import './App.css';
 
@@ -10,6 +11,8 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'register' | 'list'>('register');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [editingStudent, setEditingStudent] = useState<any>(null);
+  const [showUnauthorizedModal, setShowUnauthorizedModal] = useState(false);
+  const [unauthorizedMessage, setUnauthorizedMessage] = useState('');
 
   useEffect(() => {
     // Check for token on mount to restore login state
@@ -19,9 +22,11 @@ const App: React.FC = () => {
     }
 
     // Set up logout callback for 401 errors
-    setLogoutCallback(() => {
+    setLogoutCallback((message: string) => {
       setIsLoggedIn(false);
       setEditingStudent(null);
+      setUnauthorizedMessage(message);
+      setShowUnauthorizedModal(true);
     });
   }, []);
 
@@ -50,9 +55,18 @@ const App: React.FC = () => {
     setEditingStudent(null);
   };
 
+  const handleCloseUnauthorizedModal = () => {
+    setShowUnauthorizedModal(false);
+  };
+
   if (!isLoggedIn) {
     return (
       <div className="app">
+        <UnauthorizedModal
+          isOpen={showUnauthorizedModal}
+          message={unauthorizedMessage}
+          onClose={handleCloseUnauthorizedModal}
+        />
         <header className="app-header">
           <h1>Student Registration System</h1>
           <p className="subtitle">Secured with 2-Level AES Encryption</p>
@@ -72,6 +86,11 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
+      <UnauthorizedModal
+        isOpen={showUnauthorizedModal}
+        message={unauthorizedMessage}
+        onClose={handleCloseUnauthorizedModal}
+      />
       <header className="app-header">
         <h1>Student Registration System</h1>
         <p className="subtitle">Secured with 2-Level AES Encryption</p>

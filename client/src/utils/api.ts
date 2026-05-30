@@ -4,13 +4,14 @@ const api = axios.create({
   baseURL: 'http://localhost:5000',
 });
 
-export const setLogoutCallback = (callback: () => void) => {
+export const setLogoutCallback = (callback: (message: string) => void) => {
   api.interceptors.response.use(
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
         localStorage.removeItem('authToken');
-        callback();
+        const message = error.response?.data?.error || 'Your session has expired. Please login again.';
+        callback(message);
       }
       return Promise.reject(error);
     }
