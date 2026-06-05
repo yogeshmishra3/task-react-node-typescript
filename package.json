@@ -1,0 +1,28 @@
+{
+  "name": "student-registration-vercel",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:client": "cd client && npm start",
+    "dev:server": "cd server && npm run dev"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.6.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.5",
+    "@types/cors": "^2.8.15",
+    "@types/crypto-js": "^4.2.1",
+    "@types/express": "^4.17.20",
+    "@types/jsonwebtoken": "^9.0.0",
+    "@types/node": "^20.9.0",
+    "@vercel/node": "^3.0.0",
+    "typescript": "^5.2.2"
+  }
+}
