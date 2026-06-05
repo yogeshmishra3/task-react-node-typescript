@@ -13,6 +13,7 @@ const App: React.FC = () => {
   const [editingStudent, setEditingStudent] = useState<any>(null);
   const [showUnauthorizedModal, setShowUnauthorizedModal] = useState(false);
   const [unauthorizedMessage, setUnauthorizedMessage] = useState('');
+  const [postRegisterNotice, setPostRegisterNotice] = useState('');
 
   useEffect(() => {
     // Check for token on mount to restore login state
@@ -37,6 +38,18 @@ const App: React.FC = () => {
   const handleRegistrationSuccess = () => {
     setRefreshTrigger((prev) => prev + 1);
     setEditingStudent(null);
+
+    // If the user reached the registration form via "Go to Registration"
+    // (no auth token), send them to the login screen with a success notice
+    // instead of trying to load the authenticated student list (which would
+    // 401 and pop the unauthorized modal).
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      setPostRegisterNotice('Registration successful! Please login with your credentials.');
+      setIsLoggedIn(false);
+      setActiveTab('register');
+      return;
+    }
     setActiveTab('list');
   };
 
@@ -72,10 +85,15 @@ const App: React.FC = () => {
           <p className="subtitle">Secured with 2-Level AES Encryption</p>
         </header>
         <main className="app-main">
-          <LoginForm onLoginSuccess={handleLoginSuccess} />
+          {postRegisterNotice && (
+            <div className="success-message" style={{ marginBottom: '1rem' }}>
+              {postRegisterNotice}
+            </div>
+          )}
+          <LoginForm onLoginSuccess={() => { setPostRegisterNotice(''); handleLoginSuccess(); }} />
           <div className="info-box">
             <p>First time? Register below to create your account, then login.</p>
-            <button onClick={() => setIsLoggedIn(true)} className="btn-skip">
+            <button onClick={() => { setPostRegisterNotice(''); setIsLoggedIn(true); }} className="btn-skip">
               Go to Registration →
             </button>
           </div>
